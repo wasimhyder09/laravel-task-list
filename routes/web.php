@@ -1,6 +1,7 @@
 <?php
 
 use \Illuminate\Http\Request;
+use App\Http\Requests\TaskRequest;
 use Illuminate\Support\Facades\Route;
 use \App\Models\Task;
 
@@ -25,29 +26,12 @@ Route::get('/tasks/{task}', function (Task $task) {
   return view('show', ['task' => $task]);
 })->name('tasks.show');
 
-Route::post('/tasks', function (Request $request) {
-  $data = $request->validate([
-    'title' => 'required|max:255',
-    'description' => 'required',
-    'long_description' => 'required'
-  ]);
-  $task = new Task();
-  $task->title = $data['title'];
-  $task->description = $data['description'];
-  $task->long_description = $data['long_description'];
-  $task->save();
-  return redirect()->route('tasks.show', ['id' => $task->id])->with('success', 'Task created successfully!');
+Route::post('/tasks', function (TaskRequest $request) {
+  $task = Task::create($data = $request->validated());
+  return redirect()->route('tasks.show', ['task' => $task->id])->with('success', 'Task created successfully!');
 })->name('tasks.store');
 
-Route::put('/tasks/{task}', function (Task $task, Request $request) {
-  $data = $request->validate([
-    'title' => 'required|max:255',
-    'description' => 'required',
-    'long_description' => 'required'
-  ]);
-  $task->title = $data['title'];
-  $task->description = $data['description'];
-  $task->long_description = $data['long_description'];
-  $task->save();
-  return redirect()->route('tasks.show', ['id' => $task->id])->with('success', 'Task updated successfully!');
+Route::put('/tasks/{task}', function (Task $task, TaskRequest $request) {
+  $task->update($request->validated());
+  return redirect()->route('tasks.show', ['task' => $task->id])->with('success', 'Task updated successfully!');
 })->name('tasks.update');
